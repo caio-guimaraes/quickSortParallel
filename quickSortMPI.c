@@ -1,16 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <mpi.h>
 
 // Program 10.1.
 // The HyperQuickSort Method
-int ProcRank; // Rank of current process
-int ProcNum; // Number of processes
+
+// Declara  Variáveis globais
+void ParallelHyperQuickSort ( double *pProcData, int ProcDataSize);
+void PivotDistribution (double *pProcData, int ProcDataSize, int Dim, int Mask, int Iter, double *pPivot);
+void ProcessInitialization (double *pProcData, int *ProcDataSize);
+void imprimiVetor(int vet[], int tamanho);
+int GetProcDataDivisionPos
+int ProcRank; // ID do processo executando
+int ProcNum; // Número total de processos
+
+
 
 int main(int argc, char *argv[]) {
   double *pProcData; // Data block for the process
   int ProcDataSize; // Data block size
 
+  // Inicializa variáveis MPI 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &ProcRank);
   MPI_Comm_size(MPI_COMM_WORLD, &ProcNum);
@@ -27,6 +38,24 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
 }
 
+void ProcessInitialization (double *pProcData, int *ProcDataSize){
+  int n = 4;
+  pProcData =(double*) malloc(n*sizeof(double));
+  *ProcDataSize = n / ProcNum;
+
+  for(int i=0; i<n; i++){
+    scanf("%d ", pProcData[i]);
+  }
+
+  imprimiVetor(pProcData, n);
+}
+
+void imprimiVetor(int vet[], int tamanho){
+    int i;
+    for (i = 0; i < tamanho; i++)
+        printf("%d ", vet[i]);
+    printf("\n");
+}
 
 // The Parallel HyperQuickSort Method
 void ParallelHyperQuickSort ( double *pProcData, int ProcDataSize) {
@@ -56,7 +85,7 @@ void ParallelHyperQuickSort ( double *pProcData, int ProcDataSize) {
     int pos = GetProcDataDivisionPos (pProcData, ProcDataSize, Pivot);
 
     // Block division
-    if ( ( (rank&Mask) >> (i-1) ) == 0 ) { // high order bit= 0
+    if (((rank&Mask) >> (i-1)) == 0) { // high order bit= 0
       pSendData = & pProcData[pos+1];
       SendDataSize = ProcDataSize - pos – 1;
 
