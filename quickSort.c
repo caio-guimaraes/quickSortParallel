@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 void imprimiVetor(int vet[], int tamanho){
     int i;
@@ -37,6 +38,7 @@ void quickSort(int vet[], int inicio, int fim){
 //vet = 2 5 8 1 6 9 3 0 4 10 7
 int main(int argc, char const *argv[]) {
   int i, tamanho;
+  time_t start, end;  
 
   printf("Digite o tamanho do vetor: ");
   scanf("%d", &tamanho);
@@ -47,8 +49,13 @@ int main(int argc, char const *argv[]) {
   for(i=0; i<tamanho; i++){
     scanf("%d", &vet[i]);
   }
-
+  // Inicio marcação tempo
+  time(&start);
   quickSort(vet, 0, tamanho-1);
+  time(&end);
   imprimiVetor(vet, tamanho);
+  
+  printf("Execution time: %f\n", difftime(end, start));
+  // Fim marcação tempo
   return 0;
 }
