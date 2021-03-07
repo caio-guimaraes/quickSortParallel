@@ -11,7 +11,11 @@ void ParallelHyperQuickSort ( double *pProcData, int ProcDataSize);
 void PivotDistribution (double *pProcData, int ProcDataSize, int Dim, int Mask, int Iter, double *pPivot);
 void ProcessInitialization (double *pProcData, int *ProcDataSize);
 void imprimiVetor(int vet[], int tamanho);
-int GetProcDataDivisionPos
+
+
+int GetProcDataDivisionPos(double *pProcData, int ProcDataSize, double *pPivot);
+int ProcessTermination (double *pProcData, int *ProcDataSize);
+
 int ProcRank; // ID do processo executando
 int ProcNum; // Número total de processos
 
@@ -27,13 +31,13 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &ProcNum);
 
   // Data Initialization and their distribution among the processors
-  ProcessInitialization ( &pProcData, &ProcDataSize);
+  ProcessInitialization ( pProcData, &ProcDataSize);
 
   // Parallel sorting
   ParallelHyperQuickSort ( pProcData, ProcDataSize );
 
   // The termination of process computations
-  ProcessTermination ( pProcData, ProcDataSize );
+  ProcessTermination (pProcData, ProcDataSize);
 
   MPI_Finalize();
 }
