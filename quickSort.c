@@ -9,7 +9,7 @@ void imprimiVetor(int vet[], int tamanho){
     printf("\n");
 }
 
-static int particiona (int vet[], int inicio, int fim) {
+int particiona (int vet[], int inicio, int fim) {
   int pivo = vet[fim]; // pivô
   int i = inicio;
   int temp;
@@ -38,7 +38,7 @@ void quickSort(int vet[], int inicio, int fim){
 //vet = 2 5 8 1 6 9 3 0 4 10 7
 int main(int argc, char const *argv[]) {
   int i, tamanho;
-  time_t start, end;  
+  time_t start, end;
 
   printf("Digite o tamanho do vetor: ");
   scanf("%d", &tamanho);
@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]) {
   quickSort(vet, 0, tamanho-1);
   time(&end);
   imprimiVetor(vet, tamanho);
-  
+
   printf("Execution time: %f\n", difftime(end, start));
   // Fim marcação tempo
   return 0;
