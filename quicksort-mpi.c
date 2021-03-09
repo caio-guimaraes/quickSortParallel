@@ -19,7 +19,7 @@ void imprimeVetor(int *vet, int n) {
 	int i;
 	for (i = 0; i < n; ++i)
 		printf("%d ", vet[i]);
-	printf("\n");
+	printf("\n\n");
 }
 
 void troca(int *vet, int i, int j) {
@@ -71,9 +71,12 @@ void quicksortMPI(int *vet, int inicio, int fim, int rank, int np, int rank_inde
 
 	// Caso o destino seja maior ou igual o numero de processos...
 	if (dest >= np) {
-		quicksort(vet,inicio,fim);					// Chamamos o intercala passando a vetor, lower e upper
+		quicksort(vet,inicio,fim);					// Chamamos o quicksort passando a vetor, lower e upper
 } else if (inicio < fim) {							//  Se o destino for menor que o número de processos
-		int x = vet[inicio]; 								// valor do pivo
+		
+		int pivo = particiona(vet, inicio, fim);
+
+		/*int x = vet[inicio]; 								// valor do pivo
 		int pivo = inicio; 									// posicao do pivo
 
 		// passa todos os valores menor que o pivo para a esquerda
@@ -83,7 +86,7 @@ void quicksortMPI(int *vet, int inicio, int fim, int rank, int np, int rank_inde
 				troca(vet, pivo, i);
 			}
 		}
-		troca(vet, inicio, pivo);
+		troca(vet, inicio, pivo);*/
 
 		if (pivo - inicio > fim - pivo - 1) {
 			MPI_Send(&vet[pivo + 1], fim - pivo - 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
@@ -118,7 +121,8 @@ int main(int argc, char** argv) {
 		int vet[n];
 		// inicializaVetor(vet, n);
 		inicializaVetor_v2(vet, n);
-		imprimeVetor(vet, n);
+		// printf("Vetor original: \n");
+		// imprimeVetor(vet, n);
 
 		// Inicializa tempo de execũção
 		ti = MPI_Wtime();
@@ -138,6 +142,7 @@ int main(int argc, char** argv) {
 		// Finaliza tempo de execução
 		tf = MPI_Wtime();
 
+		printf("Vetor ordenado: \n");
 		imprimeVetor(vet, n);
 		printf("N: %d\n", n);
 		printf("Tempo de Execução: %.4f seconds\n", tf-ti);
