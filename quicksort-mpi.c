@@ -27,7 +27,11 @@ void troca(int *vet, int i, int j) {
 	vet[i] = vet[j];
 	vet[j] = temp;
 }
-
+/*
+	define o pivo como o primeiro elemento do vetor
+	passa todos os valores menores que o pivo para a esquerda,
+	e retorna o indice do pivo
+*/
 int particiona (int *vet, int inicio, int fim) {
 	int i = inicio, pivo = vet[inicio], temp;
 	for (int j = inicio+1; j < fim; j++){
@@ -41,23 +45,10 @@ int particiona (int *vet, int inicio, int fim) {
 }
 
 void quicksort(int *vet, int inicio, int fim) {
-	/*
-		Se lower continuar menor que upper
-		Define x: valor do pivo
-		   pivo: index do pivo
-
-	  Executado um for do pivo +1 (retira pivô) até o fim
-	  percorrendo todo o vetor e faz troca quando algum valor é
-	  menor que pivo, e soma o index para não levar mais em conta
-	  essa posição.
-
-	  Chama novamente o quicksort para repetir do inicio até o pivo
-	  e do (pivo +1) até upper
-	*/
 	if (inicio < fim) {
 		int pivo = particiona(vet, inicio, fim);
-		quicksort(vet, inicio, pivo);
-		quicksort(vet, pivo + 1, fim);
+		quicksort(vet, inicio, pivo);   						// chamada recursiva para a parte esquerda do vetor
+		quicksort(vet, pivo + 1, fim);							// chamada recursiva para a parte esquerda do vetor
 	}
 	// Quando lower = upper retorna
 }
@@ -69,24 +60,11 @@ void quicksortMPI(int *vet, int inicio, int fim, int rank, int np, int rank_inde
 		*/
 	int dest = rank + (1 << rank_index);
 
-	// Caso o destino seja maior ou igual o numero de processos...
+	// Caso o destino seja maior ou igual o numero de processos executa o quicksort
 	if (dest >= np) {
-		quicksort(vet,inicio,fim);					// Chamamos o quicksort passando a vetor, lower e upper
-} else if (inicio < fim) {							//  Se o destino for menor que o número de processos
-		
+		quicksort(vet,inicio,fim);
+	}else if (inicio < fim) {											//  Se o destino for menor que o número de processos faz a partição do vetor e envia para os demais processos
 		int pivo = particiona(vet, inicio, fim);
-
-		/*int x = vet[inicio]; 								// valor do pivo
-		int pivo = inicio; 									// posicao do pivo
-
-		// passa todos os valores menor que o pivo para a esquerda
-		for (int i = inicio + 1; i < fim; ++i){
-			if (vet[i] <= x) {
-				pivo++;
-				troca(vet, pivo, i);
-			}
-		}
-		troca(vet, inicio, pivo);*/
 
 		if (pivo - inicio > fim - pivo - 1) {
 			MPI_Send(&vet[pivo + 1], fim - pivo - 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
@@ -110,33 +88,18 @@ int main(int argc, char** argv) {
 
 	double ti, ti_2, tf, tf_2;
 
-	// Executado pelo rank = 0 mestre
+	// Rank 0 -> Mestre
 	if (rank == 0) {
-		ti_2 = MPI_Wtime();
-		// Selecciona vetor
+		// Selecciona tamanho do vetor
 		int n;
 		scanf("%d", &n);
 
-		// Inicializa vetay
+		// Inicializa vetor
 		int vet[n];
-		// inicializaVetor(vet, n);
 		inicializaVetor_v2(vet, n);
-		// printf("Vetor original: \n");
-		// imprimeVetor(vet, n);
 
 		// Inicializa tempo de execũção
 		ti = MPI_Wtime();
-
-		 /*
-		 	Chama o quicksortMPI passando o vetor, inicio
-			lower half, inicio upper half, o rank do processo,
-			o número de processos, e o rank index
-
-			Inicialmente o passando o vetor completo com
-			lower e upper half de 0 a n, posteriormente, a int
-			lower half será o pivô e o rank index igual ao rank(inicialmente)
-		*/
-
 		quicksortMPI(vet, 0, n, rank, np, 0);
 
 		// Finaliza tempo de execução
@@ -158,9 +121,9 @@ int main(int argc, char** argv) {
     		index_count++;
 
   	/*
-    	Espera para receber a informações do recebimento da mensagem com as informação
-			do tamanho do vetor e processo de origem. Para, dessa maneira, criar o vetor temporário e
-			preencher a origem no Send e Recive
+    	Comando bloqueante, que fica aguardando a chegada de uma mensagem, de onde seram
+			extraídas as informação do tamanho do vetor e processo de origem. Para, dessa maneira,
+			criar o vetor temporário e preencher a origem no Send e Recive
   	*/
 
 		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &msg);
@@ -185,11 +148,6 @@ int main(int argc, char** argv) {
 		free(vet_aux);
 	}
 
-	if (rank == 0){
-		tf_2 = MPI_Wtime();
-		// printf("Tempo de Execução 2: %.4f seconds\n", tf_2-ti_2);
-		// printf("Tempo de Execução 3: %.4f seconds\n", (tf_2-ti_2) - (tf-ti));
-	}
 	MPI_Finalize();
 	return 0;
 }
