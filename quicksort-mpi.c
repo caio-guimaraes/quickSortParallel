@@ -187,8 +187,8 @@ int main(int argc, char** argv) {
 
 	if (rank == 0){
 		tf_2 = MPI_Wtime();
-		printf("Tempo de Execução 2: %.4f seconds\n", tf_2-ti_2);
-		printf("Tempo de Execução 3: %.4f seconds\n", (tf_2-ti_2) - (tf-ti));
+		// printf("Tempo de Execução 2: %.4f seconds\n", tf_2-ti_2);
+		// printf("Tempo de Execução 3: %.4f seconds\n", (tf_2-ti_2) - (tf-ti));
 	}
 	MPI_Finalize();
 	return 0;
