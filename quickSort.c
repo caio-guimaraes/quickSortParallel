@@ -3,6 +3,28 @@
 #include <time.h>
 #include <sys/time.h>
 
+int *inicializa(char nomeArq[], int *tam, int *vet){
+  FILE *arq;
+	arq = fopen(nomeArq,"r");
+	int i = 0;
+	if (arq != NULL) {
+    fscanf(arq, "%d", tam);
+    vet = (int *)malloc(sizeof(int)*(*tam));
+    while(!feof(arq) && i < *tam){
+      fscanf(arq,"%d", &vet[i]);
+      i++;
+    }
+    fclose(arq);
+  }
+  return vet;
+}
+
+// void inicializa_v2(int vet[], int tam){
+//   int i;
+// 	for (i = 0; i < tam; ++i)
+// 		vet[i] = rand() % tam;
+// }
+
 void troca(int *vet, int i, int j) {
   int temp = vet[i];
   vet[i] = vet[j];
@@ -38,27 +60,31 @@ void quickSort(int vet[], int inicio, int fim){
 }
 
 int main(int argc, char const *argv[]) {
-  int i, tamanho;
+  int *vet, tamanho;
+  // int tamanho;
+  char nomeArq[100];
   double ti, tf;
   clock_t t;
 
-  printf("Digite o tamanho do vetor: ");
-  scanf("%d", &tamanho);
+  printf("Digite o nome do arquivo: ");
+  scanf("%s", nomeArq);
+  vet = inicializa(nomeArq, &tamanho, vet);
+  // scanf("%d", &tamanho);
+  // int vet[tamanho];
+  // inicializa_v2(vet, tamanho);
 
-  int *vet = (int*)malloc(tamanho*sizeof(int));
+  // printf("\n-------------- Vetor original --------------\n");
+  // imprimiVetor(vet, tamanho);
 
-  printf("Preencha o vetor: ");
-  for(i=0; i<tamanho; i++){
-    scanf("%d", &vet[i]);
-  }
   // Inicio marcação tempo
   t = clock();
   quickSort(vet, 0, tamanho);
   // Fim marcação tempo
   t = clock() - t;
 
+  printf("\n-------------- Vetor Ordenado --------------\n");
   imprimiVetor(vet, tamanho);
-  printf("Tempo de execucao: %lf", ((double)t)/((CLOCKS_PER_SEC))); //conversão para double
+  printf("\nTempo de execucao: %lf\n", ((double)t)/((CLOCKS_PER_SEC))); //conversão para double
 
   return 0;
 }

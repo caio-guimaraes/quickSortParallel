@@ -15,9 +15,25 @@ void inicializaVetor_v2(int *vet, int n){
 		scanf("%d", &vet[i]);
 }
 
-void imprimeVetor(int *vet, int n) {
+int *inicializa(char nomeArq[], int *tam, int *vet){
+  FILE *arq;
+	arq = fopen(nomeArq,"r");
+	int i = 0;
+	if (arq != NULL) {
+    fscanf(arq, "%d", tam);
+    vet = (int *)malloc(sizeof(int)*(*tam));
+    while(!feof(arq) && i < *tam){
+      fscanf(arq,"%d", &vet[i]);
+      i++;
+    }
+    fclose(arq);
+  }
+  return vet;
+}
+
+void imprimeVetor(int *vet, int tam) {
 	int i;
-	for (i = 0; i < n; ++i)
+	for (i = 0; i < tam; ++i)
 		printf("%d ", vet[i]);
 	printf("\n\n");
 }
@@ -91,23 +107,30 @@ int main(int argc, char** argv) {
 	// Rank 0 -> Mestre
 	if (rank == 0) {
 		// Selecciona tamanho do vetor
-		int n;
-		scanf("%d", &n);
+		// int n;
+		// scanf("%d", &n);
 
 		// Inicializa vetor
-		int vet[n];
-		inicializaVetor_v2(vet, n);
+		// int vet[n];
+		// inicializaVetor_v2(vet, n);
+		int *vet, tam;
+	  char nomeArq[100];
+		printf("Digite o nome do arquivo: ");
+	  scanf("%s", nomeArq);
+	  vet = inicializa(nomeArq, &tam, vet);
+		// printf("\n-------------- Vetor original --------------\n");
+		// imprimeVetor(vet, tam);
 
 		// Inicializa tempo de execũção
 		ti = MPI_Wtime();
-		quicksortMPI(vet, 0, n, rank, np, 0);
+		quicksortMPI(vet, 0, tam, rank, np, 0);
 
 		// Finaliza tempo de execução
 		tf = MPI_Wtime();
 
-		printf("Vetor ordenado: \n");
-		imprimeVetor(vet, n);
-		printf("N: %d\n", n);
+		printf("\n-------------- Vetor Ordenado --------------\n");
+		imprimeVetor(vet, tam);
+		printf("N: %d\n", tam);
 		printf("Tempo de Execução: %.4f seconds\n", tf-ti);
 
 		int i, end = -1;
