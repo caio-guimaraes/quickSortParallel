@@ -19,12 +19,6 @@ int *inicializa(char nomeArq[], int *tam, int *vet){
   return vet;
 }
 
-// void inicializa_v2(int vet[], int tam){
-//   int i;
-// 	for (i = 0; i < tam; ++i)
-// 		vet[i] = rand() % tam;
-// }
-
 void troca(int *vet, int i, int j) {
   int temp = vet[i];
   vet[i] = vet[j];
@@ -61,7 +55,6 @@ void quickSort(int vet[], int inicio, int fim){
 
 int main(int argc, char const *argv[]) {
   int *vet, tamanho;
-  // int tamanho;
   char nomeArq[100];
   double ti, tf;
   clock_t t;
@@ -69,12 +62,6 @@ int main(int argc, char const *argv[]) {
   printf("Digite o nome do arquivo: ");
   scanf("%s", nomeArq);
   vet = inicializa(nomeArq, &tamanho, vet);
-  // scanf("%d", &tamanho);
-  // int vet[tamanho];
-  // inicializa_v2(vet, tamanho);
-
-  // printf("\n-------------- Vetor original --------------\n");
-  // imprimiVetor(vet, tamanho);
 
   // Inicio marcação tempo
   t = clock();

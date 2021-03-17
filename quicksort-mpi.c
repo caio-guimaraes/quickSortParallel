@@ -3,18 +3,6 @@
 #include <time.h>
 #include <mpi.h>
 
-void inicializaVetor(int *vet, int n) {
-	int i;
-	for (i = 0; i < n; ++i)
-		vet[i] = rand() % n;
-}
-
-void inicializaVetor_v2(int *vet, int n){
-	int i;
-	for (i = 0; i < n; i++)
-		scanf("%d", &vet[i]);
-}
-
 int *inicializa(char nomeArq[], int *tam, int *vet){
   FILE *arq;
 	arq = fopen(nomeArq,"r");
@@ -64,9 +52,8 @@ void quicksort(int *vet, int inicio, int fim) {
 	if (inicio < fim) {
 		int pivo = particiona(vet, inicio, fim);
 		quicksort(vet, inicio, pivo);   						// chamada recursiva para a parte esquerda do vetor
-		quicksort(vet, pivo + 1, fim);							// chamada recursiva para a parte esquerda do vetor
+		quicksort(vet, pivo + 1, fim);							// chamada recursiva para a parte direita do vetor
 	}
-	// Quando lower = upper retorna
 }
 
 void quicksortMPI(int *vet, int inicio, int fim, int rank, int np, int rank_index) {
@@ -76,12 +63,15 @@ void quicksortMPI(int *vet, int inicio, int fim, int rank, int np, int rank_inde
 		*/
 	int dest = rank + (1 << rank_index);
 
-	// Caso o destino seja maior ou igual o numero de processos executa o quicksort
+	/*
+		Caso o destino seja maior ou igual o numero de processos executa o quicksort sequencial
+		Caso contrário faz a partição do vetor e envia a parte menor para o processo destino e
+		chama quicksortMPI recusrivamente para a parte maior
+	*/
 	if (dest >= np) {
 		quicksort(vet,inicio,fim);
-	}else if (inicio < fim) {											//  Se o destino for menor que o número de processos faz a partição do vetor e envia para os demais processos
+	}else if (inicio < fim) {
 		int pivo = particiona(vet, inicio, fim);
-
 		if (pivo - inicio > fim - pivo - 1) {
 			MPI_Send(&vet[pivo + 1], fim - pivo - 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
 			quicksortMPI(vet, inicio, pivo, rank, np, rank_index + 1);
@@ -106,20 +96,11 @@ int main(int argc, char** argv) {
 
 	// Rank 0 -> Mestre
 	if (rank == 0) {
-		// Selecciona tamanho do vetor
-		// int n;
-		// scanf("%d", &n);
-
-		// Inicializa vetor
-		// int vet[n];
-		// inicializaVetor_v2(vet, n);
+		// Inicializa vetor a partir de um arquivo
 		int *vet, tam;
 	  char nomeArq[100];
-		printf("Digite o nome do arquivo: ");
 	  scanf("%s", nomeArq);
 	  vet = inicializa(nomeArq, &tam, vet);
-		// printf("\n-------------- Vetor original --------------\n");
-		// imprimeVetor(vet, tam);
 
 		// Inicializa tempo de execũção
 		ti = MPI_Wtime();
@@ -130,13 +111,12 @@ int main(int argc, char** argv) {
 
 		printf("\n-------------- Vetor Ordenado --------------\n");
 		imprimeVetor(vet, tam);
-		printf("N: %d\n", tam);
+		printf("Tamanho: %d\n", tam);
 		printf("Tempo de Execução: %.4f seconds\n", tf-ti);
 
 		int i, end = -1;
 		for(i=0; i<np; i++)
 			MPI_Send(&end, 1, MPI_INT, i, 2, MPI_COMM_WORLD);
-
 
 	} else {
 		int tamanho, origem, index_count = 0;
