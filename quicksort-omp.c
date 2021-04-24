@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
+#include <sys/time.h>
 
 int *inicializa(char nomeArq[], int *tam, int *vet){
   FILE *arq;
@@ -39,7 +40,7 @@ void quickSort_parallel_internal(int* vet, int inicio, int fim){
 				j--;
       // printf("vet[i]: %d, i: %d\n", vet[i], i);
       // printf("vet[j]: %d, j: %d\n", vet[j], j);
-      printf("%d %d\n", i, j);
+      //printf("%d %d\n", i, j);
       if (i <= j) {
 				tmp = vet[i];
 				vet[i] = vet[j];
@@ -47,7 +48,7 @@ void quickSort_parallel_internal(int* vet, int inicio, int fim){
 				i++;
 				j--;
 			}
-      imprimeVetor(vet, 10);
+      //imprimeVetor(vet, 10);
 
 		}
 
@@ -88,9 +89,19 @@ int main(int argc, char **argv) {
   clock_t t;
 
   int *vet, tamanho;
+
   vet = inicializa(nomeArq, &tamanho, vet);
+  
+  // Inicio de marcação de tempo
+  t = clock();
+
   quickSort_parallel(vet, tamanho, nthreads);
+  
+  // Fim de marcação de tempo
+  t = clock() - t;
+
   imprimeVetor(vet, tamanho);
+  printf("\nTempo de execucao: %lf\n", ((double)t)/((CLOCKS_PER_SEC))); //conversão para double
   // #pragma omp parallel num_threads(nthreads)
   // {
   //   rank = omp_get_thread_num();
