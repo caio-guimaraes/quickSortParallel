@@ -76,6 +76,20 @@ void quicksort(int* vet, int low, int high)
 	}
 }
 
+void quickSort_parallel(int *vet, int low, int high, int numThreads){
+  int j = partition(vet,low,high);// returns the pivot element
+		#pragma omp parallel sections num_threads(numThreads)
+		{
+			#pragma omp section
+			{
+        			quicksort(vet,low, j - 1);//Thread 1
+    			}
+			#pragma omp section
+			{
+        			quicksort(vet, j + 1, high);//Thread 2
+   			}
+		}
+}
 
 int main(int argc, char **argv)
 {
@@ -95,18 +109,7 @@ int main(int argc, char **argv)
 	// 	arr[i]=rand()%n;//filling random value
 	// }
 
-	int j = partition(vet,0,tamanho-1);// returns the pivot element
-		#pragma omp parallel sections
-		{
-			#pragma omp section
-			{
-        			quicksort(vet,0, j - 1);//Thread 1
-    			}
-			#pragma omp section
-			{
-        			quicksort(vet, j + 1, tamanho-1);//Thread 2
-   			}
-		}
+	quickSort_parallel(vet, 0, tamanho-1, nthreads);
 	// int stop_s=clock();//end Time
 	// printf("Time taken: %.6fs\n", (double)(stop_s - start_s)/CLOCKS_PER_SEC);
 
