@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
-#include <sys/time.h>
 
 int *inicializa(char nomeArq[], int *tam, int *vet){
   FILE *arq;
@@ -27,90 +26,68 @@ void imprimeVetor(int *vet, int tam) {
 	printf("\n\n");
 }
 
-
-void quickSort_parallel_internal(int* vet, int inicio, int fim){
-	int i = inicio, j = fim;
-	int tmp;
-	int pivo = vet[inicio];
-
-		while (i <= j) {
-			while (vet[i] < pivo)
-				i++;
-			while (vet[j] > pivo)
-				j--;
-      // printf("vet[i]: %d, i: %d\n", vet[i], i);
-      // printf("vet[j]: %d, j: %d\n", vet[j], j);
-      //printf("%d %d\n", i, j);
-      if (i <= j) {
-				tmp = vet[i];
-				vet[i] = vet[j];
-				vet[j] = tmp;
-				i++;
-				j--;
-			}
-      //imprimeVetor(vet, 10);
-
-		}
-
-	if (inicio < fim){
-		if (inicio < j)
-      quickSort_parallel_internal(vet, inicio, j);
-		if (i < fim)
-      quickSort_parallel_internal(vet, i, fim);
-	}else{
-		#pragma omp task
-		{
-      quickSort_parallel_internal(vet, inicio, j);
-    }
-		#pragma omp task
-		{
-      quickSort_parallel_internal(vet, i, fim);
-    }
-	}
+void troca(int *vet, int i, int j) {
+  int temp = vet[i];
+  vet[i] = vet[j];
+  vet[j] = temp;
 }
 
-
-void quickSort_parallel(int* vet, int lenArray, int numThreads){
-	#pragma omp parallel num_threads(numThreads)
-	{
-		#pragma omp single nowait
-		{
-			quickSort_parallel_internal(vet, 0, lenArray-1);
-		}
-	}
-
+int particiona (int *vet, int inicio, int fim) {
+  int i = inicio, pivo = vet[inicio], temp;
+  for (int j = inicio+1; j < fim; j++){
+    if (vet[j] <= pivo) {
+      i++;
+      troca(vet, i, j);
+    }
+  }
+  troca(vet, inicio, i);
+  return i;
 }
 
+void quickSort(int vet[], int inicio, int fim){
+  if (inicio < fim){
+    int p = particiona(vet, inicio, fim);
+    quickSort(vet, inicio, p);
+    quickSort(vet, p+1, fim);
+  }
+}
 
-int main(int argc, char **argv) {
-  int nthreads = atoi(argv[1]), rank;
-  char *nomeArq = argv[2];
+void quicksort_omp(int vet[], int inicio, int fim){
+  if (inicio < fim){
+    int p = particiona(vet, inicio, fim);
+    #pragma omp parallel sections
+		{
+			#pragma omp section
+			{
+        // quicksort_omp(vet, inicio, p);
+        quickSort(vet, inicio, p);
+      }
+      #pragma omp section
+      {
+        // quicksort_omp(vet, p+1, fim);
+        quickSort(vet, p+1, fim);
+      }
+    }
+  }
+}
+
+int main(int argc, char **argv){
+  // int nthreads = atoi(argv[1]), rank;
+  char *nomeArq = argv[1];
   double ti, tf;
   clock_t t;
 
   int *vet, tamanho;
-
   vet = inicializa(nomeArq, &tamanho, vet);
-  
-  // Inicio de marcação de tempo
-  t = clock();
 
-  quickSort_parallel(vet, tamanho, nthreads);
-  
-  // Fim de marcação de tempo
+  // Inicio marcação tempo
+  t = clock();
+	quicksort_omp(vet, 0, tamanho);
+
+  // Fim marcação tempo
   t = clock() - t;
 
+  printf("\n-------------- Vetor Ordenado --------------\n");
   imprimeVetor(vet, tamanho);
   printf("\nTempo de execucao: %lf\n", ((double)t)/((CLOCKS_PER_SEC))); //conversão para double
-  // #pragma omp parallel num_threads(nthreads)
-  // {
-  //   rank = omp_get_thread_num();
-  //   // printf("thread atual: %d \n", rank);
-  //   if(rank == 0){
-  //     int *vet, tamanho;
-  //     vet = inicializa(nomeArq, &tamanho, vet);
-  //     // printf("arq: %s, tam: %d \n\n", nomeArq, tamanho);
-  //     imprimeVetor(vet, tamanho);
-  //   }
-  // }
 }
