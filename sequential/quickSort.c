@@ -48,19 +48,18 @@ void quickSort(int vet[], int inicio, int fim){
   if (inicio < fim){
     int p = particiona(vet, inicio, fim);
     quickSort(vet, inicio, p);
-
     quickSort(vet, p+1, fim);
   }
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char **argv) {
   int *vet, tamanho;
-  char nomeArq[100];
+  char *nomeArq = argv[1];
   double ti, tf;
   clock_t t;
 
-  printf("Digite o nome do arquivo: ");
-  scanf("%s", nomeArq);
+  // printf("Digite o nome do arquivo: ");
+  // scanf("%s", nomeArq);
   vet = inicializa(nomeArq, &tamanho, vet);
 
   // Inicio marcação tempo
